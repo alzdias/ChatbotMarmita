@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marmitaria Sabor & Arte — Atendimento Virtual Inteligente</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header Superior -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <div class="brand-icon">🍲</div>
+      <div>
+        <h1 class="brand-title">Marmitaria Sabor &amp; Arte</h1>
+        <p class="brand-subtitle">Atendente Virtual de Vendas com IA &amp; Guardrails</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <span class="provider-badge" id="active-provider-badge">Modo Local Offline</span>
+      <button class="btn-icon" id="btn-open-settings" title="Configurar Conexão LLM">
+        ⚙️ Configurar IA
+      </button>
+    </div>
+  </header>
+
+  <!-- Navegação por Abas para Telas Menores / Mobile -->
+  <nav class="mobile-nav-bar">
+    <button class="mobile-tab-btn" data-tab="menu">Cardápio</button>
+    <button class="mobile-tab-btn active" data-tab="chat">Chat Atendimento</button>
+    <button class="mobile-tab-btn" data-tab="cart">
+      Carrinho <span class="badge-counter" id="mobile-cart-badge">0</span>
+    </button>
+  </nav>
+
+  <!-- Layout Principal em 3 Colunas -->
+  <main class="app-container">
+
+    <!-- Coluna Esquerda: Cardápio do Dia -->
+    <aside class="sidebar-panel" id="panel-menu">
+      <div class="panel-header">
+        <h2 class="panel-title">📋 Cardápio do Dia</h2>
+        <small class="text-muted">Preços Oficiais</small>
+      </div>
+      <div class="menu-scrollable" id="menu-preview-list">
+        <!-- Inserido dinamicamente via JS -->
+      </div>
+    </aside>
+
+    <!-- Coluna Central: Chat Conversacional -->
+    <section class="chat-panel active-panel" id="panel-chat">
+      <div class="chat-messages" id="chat-messages">
+        <!-- Balões de mensagens entram aqui -->
+      </div>
+
+      <!-- Indicador de Digitação -->
+      <div class="typing-indicator" id="typing-indicator">
+        <span>SaborBot está digitando</span>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+
+      <!-- Chips de Sugestões Rápidas -->
+      <div class="quick-prompts-bar">
+        <button class="quick-chip" data-prompt="Quais são as opções de marmitas de hoje?">📋 Ver Cardápio</button>
+        <button class="quick-chip" data-prompt="Quero 2 marmitas de bife acebolado bem passadas e sem cebola">🥩 2x Bife (customizado)</button>
+        <button class="quick-chip" data-prompt="Adicione uma marmita de frango grelhado">🍗 1x Frango</button>
+        <button class="quick-chip" data-prompt="Quero uma de cada opção do cardápio">🍱 Uma de cada</button>
+        <button class="quick-chip" data-prompt="Quanto ficou tudo até agora?">💰 Ver Subtotal</button>
+        <button class="quick-chip" data-prompt="Meu endereço é Rua das Acácias, 150, Centro">📍 Informar Endereço</button>
+        <button class="quick-chip" data-prompt="Pode fechar e confirmar meu pedido!">✅ Confirmar Pedido</button>
+      </div>
+
+      <!-- Caixa de Input de Mensagem -->
+      <div class="chat-input-area">
+        <input 
+          type="text" 
+          id="chat-input" 
+          class="chat-input" 
+          placeholder="Digite sua mensagem ou pedido em linguagem natural..." 
+          autocomplete="off"
+        />
+        <button id="send-btn" class="btn-send" title="Enviar Mensagem">➤</button>
+      </div>
+    </section>
+
+    <!-- Coluna Direita: Carrinho e Resumo do Pedido -->
+    <aside class="cart-panel" id="panel-cart">
+      <div class="panel-header">
+        <h2 class="panel-title">
+          🛒 Carrinho de Compras
+          <span class="badge-counter" id="cart-badge">0</span>
+        </h2>
+        <span class="order-badge status-draft" id="order-status-badge">Montando Pedido</span>
+      </div>
+
+      <div class="cart-items-container" id="cart-items-list">
+        <!-- Renderizado pelo CartService -->
+      </div>
+
+      <div class="cart-summary-footer">
+        <div class="delivery-box" id="delivery-address-display">
+          <em>📍 Nenhum endereço informado ainda.</em>
+        </div>
+
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span id="cart-subtotal">R$ 0,00</span>
+        </div>
+        <div class="summary-row">
+          <span>Taxa de Entrega:</span>
+          <span id="cart-delivery">R$ 0,00</span>
+        </div>
+        <div class="summary-row total-row">
+          <span>Total a Pagar:</span>
+          <span id="cart-total">R$ 0,00</span>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Modal de Configuração do Provedor LLM -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">⚙️ Configurações da Inteligência Artificial</h3>
+        <button class="btn-close" id="btn-close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="security-note">
+          <strong>⚠️ Nota de Arquitetura &amp; Segurança:</strong><br>
+          Esta aplicação é 100% Client-Side. Por padrão, ela utiliza o <strong>Mock Engine Offline</strong> integrado (que interpreta linguagem natural e respeita todas as regras e guardrails sem consumir créditos ou expor dados).<br>
+          Se optar por utilizar chaves de API externas (Gemini, OpenAI ou Groq), ela será mantida unicamente no seu navegador (SessionStorage) e nunca salva no servidor.
+        </div>
+
+        <div class="form-group">
+          <label for="provider-select">Provedor de IA:</label>
+          <select id="provider-select" class="form-select">
+            <option value="mock">Modo Offline Local (Mock PLN - Sem Chave / Ilimitado)</option>
+            <option value="gemini">Google Gemini API (gemini-1.5-flash)</option>
+            <option value="openai">OpenAI API (gpt-4o-mini)</option>
+            <option value="groq">Groq Cloud (Llama 3.3 70B)</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="api-key-container" style="display: none;">
+          <label for="api-key-input">Sua API Key do Provedor:</label>
+          <input type="password" id="api-key-input" class="form-input" placeholder="Insira sua chave de API (ex: AIzaSy... ou sk-...)">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-cancel-settings">Cancelar</button>
+        <button class="btn-primary" id="btn-save-settings">Salvar Configurações</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
